@@ -1,0 +1,15 @@
+proc.h 
+#define NR_PROCS	3   改成 #define MAX_NR_PROCS	10
+
+#define STACK_SIZE_TOTAL	(MAX_NR_PROCS * STACK_SIZE_TESTA) 
+
+新增  #define DEFALUT_NR_PROCS 3
+
+main.c 
+p36   	for (i = 0; i < NR_TASKS + NR_PROCS; i++)  改成 	for (i = 0; i < NR_TASKS + DEFALUT_NR_PROCS; i++)
+
+global.c PUBLIC	PROCESS	proc_table[NR_TASKS + NR_PROCS];   改成  PUBLIC	PROCESS	proc_table[NR_TASKS + MAX_NR_PROCS];
+
+
+main.c 添加新函数 default_process_init   empty_processList_init
+
