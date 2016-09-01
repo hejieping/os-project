@@ -105,7 +105,7 @@ void default_process_init()
 
 		p_task_stack -= p_task->stacksize;
 		p_proc++;
-		p_task++;
+	//	p_task++;
 		selector_ldt += 1 << 3;
 	}
 
@@ -113,10 +113,78 @@ void default_process_init()
 	proc_table[1].ticks = proc_table[1].priority = 5;
 	proc_table[2].ticks = proc_table[2].priority = 5;
 	proc_table[3].ticks = proc_table[3].priority = 5;
+        proc_table[4].ticks = proc_table[4].priority = 5;
 
 	proc_table[1].nr_tty = 0;
 	proc_table[2].nr_tty = 0;
 	proc_table[3].nr_tty = 0;
+	proc_table[4].nr_tty = 0;
+}
+PUBLIC void addProcess()
+{
+
+	TASK*		p_task = user_proc_table;
+	PROCESS*	p_proc = proc_table+(NR_TASKS + NR_PROCS);
+
+	char*		p_task_stack = task_stack + STACK_SIZE_TOTAL;
+	u16		selector_ldt = SELECTOR_LDT_FIRST;
+	u8              privilege= PRIVILEGE_USER;
+	u8              rpl= RPL_USER;
+	int             eflags = 0x202;
+	for (int i = NR_TASKS + NR_PROCS; i < MAX_NR_PROCS; i++)
+	{
+		if (proc_table[i].priority == 0)
+		{
+			char *process_name;
+                        printf("please input process's name!\n",0);
+			getCommand(process_name);
+
+
+
+        
+
+                p_task =  user_proc_table + (i - NR_TASKS);
+		strcpy(p_proc->p_name,process_name);	// name of the process
+		p_proc->pid = i;			// pid
+
+		p_proc->ldt_sel = selector_ldt;
+
+		memcpy(&p_proc->ldts[0], &gdt[SELECTOR_KERNEL_CS >> 3],
+			sizeof(DESCRIPTOR));
+		p_proc->ldts[0].attr1 = DA_C | privilege << 5;
+		memcpy(&p_proc->ldts[1], &gdt[SELECTOR_KERNEL_DS >> 3],
+			sizeof(DESCRIPTOR));
+		p_proc->ldts[1].attr1 = DA_DRW | privilege << 5;
+		p_proc->regs.cs = (0 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
+		p_proc->regs.ds = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
+		p_proc->regs.es = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
+		p_proc->regs.fs = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
+		p_proc->regs.ss = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
+		p_proc->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
+                
+		p_proc->regs.eip = (u32)p_task[i-NR_TASKS].initial_eip;
+		
+		p_proc->regs.eip = (u32)p_task->initial_eip;
+		p_proc->regs.esp = (u32)p_task_stack -STACK_SIZE_TTY*i;
+		p_proc->regs.eflags = eflags;
+
+		p_proc->nr_tty = 0;
+
+
+                proc_table[i].ticks = proc_table[i].priority = 5;
+	        proc_table[i].nr_tty = 0;
+
+
+
+		        printf("add process successfully\n", 0);
+			return ;
+		}
+	   	selector_ldt += 1 << 3;
+		p_proc++;
+	}
+	printf("process list is full", 0);
+	return ;
+
 }
 void empty_processList_init()
 {
@@ -128,34 +196,23 @@ void empty_processList_init()
 /*======================================================================*
                                TestA
  *======================================================================*/
-void TestA()
-{
-	int i = 0;
-	clear();
-        char * str[256];
-//	readcommand(str);
-//	printf(str,0);
-	while (1) {
-	//	printf("<Ticks:%x>", get_ticks());
-		milli_delay(10000);
-		
-	}
-}
+
 
 /*======================================================================*
                                TestB
  *======================================================================*/
 
-void TestB()
+void main_process()
 {
-	int i = 0x1000;
+/*	int i = 0x2000;
         char  str[256];
-	char *start ;
-	int number = 2124;
+
+	int number = 2124;*/
 
         Welcome();
 	while(1)
 	{
+                char *start ;
 		write_command();
                 getCommand(start);
 		int id = getCommandId(start);
@@ -178,14 +235,7 @@ void TestB()
 /*======================================================================*
                                TestB
  *======================================================================*/
-void TestC()
-{
-	int i = 0x2000;
-	while(1){
-	//	disp_str("c");
-		milli_delay(200);
-	}
-}
+
 void MYclear()
 {
 	clear_screen(0,console_table[0].cursor);
@@ -194,86 +244,8 @@ void MYclear()
 }
 
 
-PUBLIC bool private_killProcess(int pid)
-{
-	if (proc_table[pid].priority == 0)
-	{
-		printf("process isn't exist", 0);
-		return false;
-	}
-	else
-	{
-		proc_table[pid].priority == 0;
-		{
-			printf("kill process successfully", 0);
-			return true ;
-		}
-	}
-}
-
-PUBLIC bool addProcess()
-{
-	TASK*		p_task = task_table;
-	PROCESS*	p_proc = proc_table;
-
-	for (int i = NR_TASKS + NR_PROCS; i < MAX_NR_PROCS; i++)
-	{
-		if (proc_table[i].priority == 0)
-		{
-			char *process_name;
-                        printf("please input process's name!\n",0);
-			write_command();
-			getCommand(process_name);
 
 
-
-	char*		p_task_stack = task_stack + STACK_SIZE_TOTAL;
-	u16		selector_ldt = SELECTOR_LDT_FIRST;
-	u8              privilege= PRIVILEGE_USER;
-	u8              rpl= RPL_USER;
-	int             eflags;
-
-			eflags = 0x202; /* IF=1, bit 2 is always 1 */
-		strcpy(p_proc->p_name,process_name);	// name of the process
-		p_proc->pid = i;			// pid
-
-		p_proc->ldt_sel = selector_ldt;
-
-		memcpy(&p_proc->ldts[0], &gdt[SELECTOR_KERNEL_CS >> 3],
-			sizeof(DESCRIPTOR));
-		p_proc->ldts[0].attr1 = DA_C | privilege << 5;
-		memcpy(&p_proc->ldts[1], &gdt[SELECTOR_KERNEL_DS >> 3],
-			sizeof(DESCRIPTOR));
-		p_proc->ldts[1].attr1 = DA_DRW | privilege << 5;
-		p_proc->regs.cs = (0 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-		p_proc->regs.ds = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-		p_proc->regs.es = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-		p_proc->regs.fs = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-		p_proc->regs.ss = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | rpl;
-		p_proc->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | rpl;
-
-	//	p_proc->regs.eip = (u32)p_task[i-NR_TASKS].initial_eip;
-		TASK*		p_task =  user_proc_table + (i - NR_TASKS);
-		p_proc->regs.eip = (u32)p_task->initial_eip;
-		p_proc->regs.esp = (u32)p_task_stack + STACK_SIZE_TOTAL-STACK_SIZE_TESTA*i;
-		p_proc->regs.eflags = eflags;
-
-		p_proc->nr_tty = 0;
-
-	//	p_proc++;
-
-		selector_ldt += 1 << 3;
-
-
-		        printf("add process successfully", 0);
-			return true;
-		}
-		p_proc++;
-	}
-	printf("process list is full", 0);
-	return false ;
-
-}
 
 
 PUBLIC void showProInfo()
@@ -291,35 +263,54 @@ PUBLIC void showProInfo()
 	}
 	printf("=======================================================\n", 0);
 }
-
-PUBLIC bool killProcess()
+PUBLIC void private_killProcess(int pid)
 {
-	char* ctr_number;
-        write_command();
+	if (proc_table[pid].priority == 0)
+	{
+		printf("process isn't exist\n", 0);
+		return ;
+	}
+	else
+	{
+		proc_table[pid].priority = 0;
+		{
+			printf("kill process successfully\n", 0);
+			return ;
+		}
+	}
+}
+
+PUBLIC void killProcess()
+{
+	char* ctr_number[256];
+        char* temp[256];
         printf("please input process's id!\n",0);
 	getCommand(ctr_number);
+        strcpy(temp,ctr_number);
+        
 
 	int number;
 	if (!parseIntoInt(ctr_number, & number))
 	{
 		printf("pid is error\n", 0);
-		return true;
+		return ;
 	}
 	else
 	{
 		if (number >= MAX_NR_PROCS)
 		{
 			printf("pid is out of range!\n",0);
-                        return;
+                        return ;
 
 		}
 		if (number < NR_TASKS + NR_PROCS)
 		{
 			printf("process is system_process,can't be kill!\n",0);
-                        return;
+                        return ;
 		}
 		private_killProcess(number);
 	}
+
 }
 
 
@@ -383,13 +374,28 @@ PUBLIC  void Welcome()
 
 PUBLIC void sys_shutdown(PROCESS *p_pro)
 {
+        for(int i = 0;i<MAX_NR_PROCS;i++)
+ 	{
+		p_pro->priority = 0;
+		p_pro++;
+	}
+
+        clear();
+        
+        printf("\nclosing system",0);
+        milli_delay(1000);
+        clear();
+        
+
+
+     /*
 	int i;
 	disable_int();
 	for (i = 0; i<16; ++i)
 	{
 		disable_irq(i);
 	}
-	while (1) {}
+	while (1) {}*/
 }
 int getCommandId(char *str)
 {
@@ -432,82 +438,106 @@ int getCommandId(char *str)
 	}
 	return id;
 }
-void function1()
-{
-	int i = 0;
-	clear();
-        char * str[256];
 
+
+void process_1()
+{
+	clear();
+//	readcommand(str);
+//	printf(str,0);
 	while (1) {
-		milli_delay(10000);
+
+		milli_delay(200);
 		
 	}
 }
-void function2()
+void process_2()
 {
-	int i = 0;
-	clear();
-        char * str[256];
 
-	while (1) {
-		milli_delay(10000);
-		
+	while(1){
+
+		milli_delay(200);
 	}
 }
-void function3()
+void process_3()
 {
-	int i = 0;
-	clear();
-        char * str[256];
 
-	while (1) {
-		milli_delay(10000);
-		
-	}
-}
-void function4()
-{
-	int i = 0;
-	clear();
-        char * str[256];
+	while(1){
 
-	while (1) {
-		milli_delay(10000);
-		
+		milli_delay(200);
 	}
 }
 
-void function5()
+void process_4()
 {
-	int i = 0;
-	clear();
-        char * str[256];
+
 
 	while (1) {
-		milli_delay(10000);
+		disp_str("funciont2");
+		milli_delay(200);
 		
 	}
 }
-void function6()
+void process_5()
 {
-	int i = 0;
-	clear();
-        char * str[256];
+
 
 	while (1) {
-		milli_delay(10000);
+		disp_str("funciont3");
+		milli_delay(200);
 		
 	}
 }
-void function7()
+void process_6()
 {
-	int i = 0;
-	clear();
-        char * str[256];
+
 
 	while (1) {
-		milli_delay(10000);
+		disp_str("funciont4");
+		milli_delay(200);
 		
+	}
+}
+
+void process_7()
+{
+
+
+	while (1) {
+		disp_str("funciont5");
+		milli_delay(200);
+		
+	}
+}
+void process_8()
+{
+
+
+	while (1) {
+		disp_str("funciont6");
+		milli_delay(200);
+		
+	}
+}
+void process_9()
+{
+
+
+	while (1) {
+		disp_str("funciont7");
+		milli_delay(200);
+		
+	}
+}
+
+void process_10()
+{
+
+
+
+	while(1){
+		disp_str("funciont1");
+		milli_delay(200);
 	}
 }
 

@@ -52,15 +52,15 @@ typedef struct s_task {
 
 /* Number of tasks & procs */
 #define NR_TASKS	1
-#define MAX_NR_PROCS	10
-#define NR_PROCS 3
+#define MAX_NR_PROCS	11
+#define NR_PROCS 4
 
 
 /* stacks of tasks */
 #define STACK_SIZE_TTY		0x8000
-#define STACK_SIZE_TESTA	0x8000
-#define STACK_SIZE_TESTB	0x8000
-#define STACK_SIZE_TESTC	0x8000
+#define STACK_SIZE_PROCESS	0x8000
+// #define STACK_SIZE_TESTB	0x8000
+// #define STACK_SIZE_TESTC	0x8000
 
-#define STACK_SIZE_TOTAL	(MAX_NR_PROCS * STACK_SIZE_TESTA)
+#define STACK_SIZE_TOTAL	(MAX_NR_PROCS * STACK_SIZE_PROCESS)
 

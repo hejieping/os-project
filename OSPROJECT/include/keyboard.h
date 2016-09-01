@@ -28,7 +28,13 @@
 
 #define MASK_RAW	0x01FF		/* raw key value = code passed to tty & MASK_RAW
 					   the value can be found either in the keymap column 0
-					   or in the list below */
+					   or in the list below *
+/**/
+#define E0 0xE0
+#define E1 0xE1
+#define MAKE_LSHIFT 0x2A
+#define BREAK_PRINT_SCREEN 0xB7
+
 
 /* Special keys */
 #define ESC		(0x01 + FLAG_EXT)	/* Esc		*/

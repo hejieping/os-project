@@ -16,8 +16,8 @@
 #include "keyboard.h"
 #include "proto.h"
 
-#define TTY_FIRST	(tty_table)
-#define TTY_END		(tty_table + NR_CONSOLES)
+  // #define TTY_FIRST	(tty_table)
+  // #define TTY_END		(tty_table + NR_CONSOLES)
 
 PRIVATE void init_tty(TTY* p_tty);
 PRIVATE void tty_do_read(TTY* p_tty);
@@ -36,12 +36,12 @@ PUBLIC void task_tty()
 
 	init_keyboard();
 
-	for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
+	for (p_tty=tty_table;p_tty<tty_table + NR_CONSOLES;p_tty++) {
 		init_tty(p_tty);
 	}
 	select_console(0);
 	while (1) {
-		for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
+		for (p_tty=tty_table;p_tty<tty_table + NR_CONSOLES;p_tty++) {
 			tty_do_read(p_tty);
 			tty_do_write(p_tty);
 		}
@@ -54,9 +54,11 @@ PUBLIC void task_tty()
 PRIVATE void init_tty(TTY* p_tty)
 {
 	p_tty->inbuf_count = 0;
-	p_tty->p_inbuf_head = p_tty->p_inbuf_tail = p_tty->in_buf;
-	p_tty->p_tempbuffer_head =p_tty->p_tempbuffer_tail = p_tty->tempbuffer;
 	p_tty->tempbuffer_count = 0;
+	p_tty->p_inbuf_head =  p_tty->in_buf;
+        p_tty->p_inbuf_tail =  p_tty->in_buf;
+	p_tty->p_tempbuffer_head = p_tty->tempbuffer;
+        p_tty->p_tempbuffer_tail = p_tty->tempbuffer;
 	p_tty->canread = 0;
 	init_screen(p_tty);
 }
@@ -124,10 +126,11 @@ PRIVATE void put_key(TTY* p_tty, u32 key)
 	if (p_tty->inbuf_count < TTY_IN_BYTES) {
 		*(p_tty->p_inbuf_head) = key;
 		p_tty->p_inbuf_head++;
-		if (p_tty->p_inbuf_head == p_tty->in_buf + TTY_IN_BYTES) {
+		p_tty->inbuf_count++;
+		if (p_tty->inbuf_count == TTY_IN_BYTES) {
 			p_tty->p_inbuf_head = p_tty->in_buf;
 		}
-		p_tty->inbuf_count++;
+
 	}
 }
 

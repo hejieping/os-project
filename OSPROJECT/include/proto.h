@@ -22,16 +22,18 @@ PUBLIC u32	seg2phys(u16 seg);
 void restart();
 
 /* main.c */
-void TestA();
-void TestB();
-void TestC();
-void function1();
-void function2();
-void function3();
-void function4();
-void function5();
-void function6();
-void function7();
+void process_1();
+void main_process();
+void process_2();
+void process_4();
+void process_5();
+void process_6();
+void process_7();
+void process_8();
+void process_9();
+void process_10();
+void process_3();
+PUBLIC void killprocess();
 
 /* i8259.c */
 PUBLIC void put_irq_handler(int irq, irq_handler handler);

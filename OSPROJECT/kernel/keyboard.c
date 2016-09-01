@@ -100,7 +100,7 @@ PUBLIC void keyboard_read(TTY* p_tty)
 		scan_code = get_byte_from_kbuf();
 
 		/* 下面开始解析扫描码 */
-		if (scan_code == 0xE1) {
+		if (scan_code == E1) {
 			int i;
 			u8 pausebrk_scode[] = {0xE1, 0x1D, 0x45,
 					       0xE1, 0x9D, 0xC5};
@@ -115,12 +115,12 @@ PUBLIC void keyboard_read(TTY* p_tty)
 				key = PAUSEBREAK;
 			}
 		}
-		else if (scan_code == 0xE0) {
+		else if (scan_code == E0) {
 			scan_code = get_byte_from_kbuf();
 
 			/* PrintScreen 被按下 */
-			if (scan_code == 0x2A) {
-				if (get_byte_from_kbuf() == 0xE0) {
+			if (scan_code == MAKE_LSHIFT) {
+				if (get_byte_from_kbuf() == E0) {
 					if (get_byte_from_kbuf() == 0x37) {
 						key = PRINTSCREEN;
 						make = 1;
@@ -128,8 +128,8 @@ PUBLIC void keyboard_read(TTY* p_tty)
 				}
 			}
 			/* PrintScreen 被释放 */
-			if (scan_code == 0xB7) {
-				if (get_byte_from_kbuf() == 0xE0) {
+			if (scan_code == BREAK_PRINT_SCREEN) {
+				if (get_byte_from_kbuf() == E0) {
 					if (get_byte_from_kbuf() == 0xAA) {
 						key = PRINTSCREEN;
 						make = 0;

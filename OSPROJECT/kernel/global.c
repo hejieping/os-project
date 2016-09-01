@@ -23,16 +23,17 @@ PUBLIC	TASK	task_table[NR_TASKS] = {
 	{task_tty, STACK_SIZE_TTY, "tty"}};
 
 PUBLIC  TASK    user_proc_table[MAX_NR_PROCS-NR_TASKS] = {
-	{TestA, STACK_SIZE_TESTA, "TestA"},
-	{TestB, STACK_SIZE_TESTB, "TestB"},
-	{TestC, STACK_SIZE_TESTC, "TestC"},
-        {function1,STACK_SIZE_TESTA,"function1"},
-	{function2,STACK_SIZE_TESTA,"function2"},
-	{function3,STACK_SIZE_TESTA,"function3"},
-	{function4,STACK_SIZE_TESTA,"function4"},
-	{function5,STACK_SIZE_TESTA,"function5"},
-	{function6,STACK_SIZE_TESTA,"function6"},
-	{function7,STACK_SIZE_TESTA,"function7"},};
+	{process_1, STACK_SIZE_PROCESS, "process_1"},
+	{main_process, STACK_SIZE_PROCESS, "main_process"},
+	{process_2, STACK_SIZE_PROCESS, "process_2"},
+        {process_3,STACK_SIZE_PROCESS,"process_3"},
+        {process_4,STACK_SIZE_PROCESS,"process_4"},
+	{process_5,STACK_SIZE_PROCESS,"process_5"},
+	{process_6,STACK_SIZE_PROCESS,"process_6"},
+	{process_7,STACK_SIZE_PROCESS,"process_7"},
+	{process_8,STACK_SIZE_PROCESS,"process_8"},
+	{process_9,STACK_SIZE_PROCESS,"process_9"},
+	{process_10,STACK_SIZE_PROCESS,"process_10"}};
 
 PUBLIC	char		task_stack[STACK_SIZE_TOTAL];
 
